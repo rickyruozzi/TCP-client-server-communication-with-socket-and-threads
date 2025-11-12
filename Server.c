@@ -19,7 +19,7 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; //mutex per la gestione conco
 client clients[Max_clients]; //array dei client connessi
 int client_count = 0; //tracking del numero di client connessi al server
 
-void handleClient(void* arg);
+void* handleClient(void* arg);
 
 int main(){
     printf("Server is running...\n");
@@ -57,12 +57,12 @@ int main(){
     return 0;
 }
 
-void handleClient(void* arg){
+void* handleClient(void* arg){
     client* client_info = (client*)arg;
     char message[1024];
+    char string[1024] = "Message from server: Hello Client!\n ";
+    send(client_info->fd, string , sizeof(string), 0);
     while(1){
-        char string[1024] = "Message from server: Hello Client!\n ";
-        send(client_info->fd, string , sizeof(string), 0);
         ssize_t bytes_received = recv(client_info->fd, message, sizeof(message), 0);
         if(bytes_received <= 0){
             perror("Client disconnected or error occurred.");
@@ -72,4 +72,5 @@ void handleClient(void* arg){
         message[bytes_received] = '\0'; //aggiunge il terminatre di stringa
         printf("Received from %s:%d: %s\n", client_info->ip, client_info->port, message);
     }
+    return NULL;
 }
